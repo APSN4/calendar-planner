@@ -1,11 +1,11 @@
 from app.database.db import UserDB, EventDB, TaskDB
 from app.models.event import Event
 from app.models.task import Task
-from app.models.user import User
+from app.models.user import User, UserCreate
 import json
 
 
-def create_user(db_session, user: User):
+def create_user(db_session, user: UserCreate):
     db_user = UserDB(
         name=user.name,
         surname=user.surname,
@@ -20,6 +20,10 @@ def create_user(db_session, user: User):
 
 def get_user(db_session, user_id: int):
     return db_session.query(UserDB).filter(UserDB.id == user_id).first()
+
+
+def get_user_by_email(db_session, user_email: str):
+    return db_session.query(UserDB).filter(UserDB.email == user_email).first()
 
 
 def update_user(db_session, user_id: int, user: User):
@@ -59,7 +63,6 @@ def create_event(db_session, event: Event):
     db_session.commit()
     db_session.refresh(db_event)
     return db_event
-
 
 
 def get_event(db_session, event_id: int):

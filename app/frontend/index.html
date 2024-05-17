@@ -1,72 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница</title>
+    <title>Интерактивный Календарь</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .controls {
+            margin: 20px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+        .calendar div {
+            padding: 20px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .calendar .header {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #71b7e6, #9b59b6);
         }
-        .container {
-            background-color: #fff;
-            padding: 2em;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            width: 100%;
             text-align: center;
-            width: 300px;
         }
-        .container h1 {
-            margin-bottom: 1.5em;
-        }
-        .container input[type="email"],
-        .container input[type="password"] {
-            width: 100%;
-            padding: 0.8em;
-            margin-bottom: 1em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .container button {
-            width: 100%;
-            padding: 0.8em;
-            border: none;
-            border-radius: 4px;
-            background-color: #5c67f2;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        .container button:hover {
-            background-color: #4b56d4;
-        }
-        .container .register-link {
-            margin-top: 1em;
+        .modal-content input,
+        .modal-content button {
             display: block;
-            font-size: 0.9em;
-            color: #5c67f2;
-            text-decoration: none;
-        }
-        .container .register-link:hover {
-            text-decoration: underline;
+            margin: 10px auto;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Авторизация</h1>
-        <form>
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Пароль" required>
-            <button type="submit">Войти</button>
-            <a href="/register" class="register-link">Еще не зарегистрированы?</a>
-        </form>
+    <div class="controls">
+        <select id="yearSelect"></select>
+        <select id="monthSelect">
+            <option value="0">Январь</option>
+            <option value="1">Февраль</option>
+            <option value="2">Март</option>
+            <option value="3">Апрель</option>
+            <option value="4">Май</option>
+            <option value="5">Июнь</option>
+            <option value="6">Июль</option>
+            <option value="7">Август</option>
+            <option value="8">Сентябрь</option>
+            <option value="9">Октябрь</option>
+            <option value="10">Ноябрь</option>
+            <option value="11">Декабрь</option>
+        </select>
+        <button onclick="updateCalendar()">Показать календарь</button>
     </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2>Добавить событие</h2>
+            <input type="text" id="eventTitle" placeholder="Название события">
+            <input type="date" id="eventDate">
+            <button onclick="addEvent()">Добавить</button>
+            <button onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <form action="/exit" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+
+    <script>
+        function populateYearSelect(startYear, endYear) {
+            const yearSelect = document.getElementById('yearSelect');
+            for (let year = startYear; year <= endYear; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.innerText = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function createCalendar(year, month) {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            const headerDays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            headerDays.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'header';
+                div.innerText = day;
+                calendar.appendChild(div);
+            });
+
+            const firstDay = new Date(year, month).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                calendar.appendChild(emptyDiv);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.innerText = i;
+                dayDiv.onclick = function() {
+                    openModal(year, month, i);
+                };
+                calendar.appendChild(dayDiv);
+            }
+        }
+
+        function openModal(year, month, day) {
+            const modal = document.getElementById('modal');
+            const eventDate = document.getElementById('eventDate');
+            eventDate.value = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
+        function addEvent() {
+            const eventTitle = document.getElementById('eventTitle').value;
+            const eventDate = document.getElementById('eventDate').value;
+            alert(`Событие "${eventTitle}" добавлено на ${eventDate}`);
+            closeModal();
+        }
+
+        function updateCalendar() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            createCalendar(parseInt(year), parseInt(month));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateYearSelect(2020, 2030); // Populate years from 2020 to 2030
+            document.getElementById('yearSelect').value = new Date().getFullYear();
+            document.getElementById('monthSelect').value = new Date().getMonth();
+            updateCalendar();
+        });
+    </script>
 </body>
 </html>

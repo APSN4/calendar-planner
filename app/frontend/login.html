@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
+    <title>Главная страница</title>
     <style>
         body {
             display: flex;
@@ -20,21 +20,21 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 300px;
+            max-width: 300px;
+            width: 100%;
         }
         .container h1 {
             margin-bottom: 1.5em;
         }
-        .container input[type="text"],
         .container input[type="email"],
         .container input[type="password"],
         .container button {
-            box-sizing: border-box; /* Добавлено */
-            width: calc(100% - 16px); /* Учитываем отступы */
+            width: calc(100% - 2 * 0.8em);
             padding: 0.8em;
             margin-bottom: 1em;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box; /* Добавлено */
         }
         .container button {
             background-color: #5c67f2;
@@ -46,28 +46,43 @@
         .container button:hover {
             background-color: #4b56d4;
         }
-        .container .login-link {
+        .container .register-link {
             margin-top: 1em;
             display: block;
             font-size: 0.9em;
             color: #5c67f2;
             text-decoration: none;
         }
-        .container .login-link:hover {
+        .container .register-link:hover {
             text-decoration: underline;
         }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorParam = urlParams.get('error');
+
+        if (errorParam === 'auth') {
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = 'Неверные данные. Пожалуйста, попробуйте снова.';
+            errorMessage.style.color = '#ff4d4d';
+            errorMessage.style.marginTop = '1em';
+            document.querySelector('.container').appendChild(errorMessage);
+        }
+    });
+    </script>
+
+
 </head>
 <body>
     <div class="container">
-        <h1>Регистрация</h1>
-        <form action="/register" method="post">
-            <input type="text" name="name" placeholder="Имя" required>
-            <input type="text" name="surname" placeholder="Фамилия" required>
+        <h1>Авторизация</h1>
+        <form action="/login" method="post">
             <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Пароль" required>
-            <button type="submit">Зарегистрироваться</button>
-            <a href="/login" class="login-link">Уже зарегистрированы?</a>
+            <button type="submit">Войти</button>
+            <a href="/register" class="register-link">Еще не зарегистрированы?</a>
         </form>
     </div>
 </body>
