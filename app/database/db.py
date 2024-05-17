@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import create_engine, Column, String, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -29,6 +31,17 @@ class UserDB(Base):
     surname = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
+    event_list = Column(String)
+
+    def __init__(self, name, surname, email, password, event_list=None):
+        self.name = name
+        self.surname = surname
+        self.email = email
+        self.password = password
+        if event_list is None:
+            self.event_list = "[]"  # По умолчанию список событий пустой, представленный в виде JSON строки
+        else:
+            self.event_list = json.dumps(event_list)
 
 
 class EventDB(Base):
@@ -37,12 +50,23 @@ class EventDB(Base):
     date = Column(String, index=True)
     time = Column(String, index=True)
     place = Column(String, index=True)
-    budget = Column(String)
+    budget = Column(Integer)
     description = Column(String)
     task_list = Column(String)  # We'll store the task list as a JSON string
     progress_bar = Column(Integer)
     alert = Column(String)  # We'll store the alert list as a JSON string
     status = Column(Integer)
+
+    def __init__(self, date, time, place, budget, description, task_list=None, progress_bar=0, alert=None, status=0):
+        self.date = date
+        self.time = time
+        self.place = place
+        self.budget = budget
+        self.description = description
+        self.task_list = json.dumps(task_list) if task_list is not None else "[]"
+        self.progress_bar = progress_bar
+        self.alert = json.dumps(alert) if alert is not None else "[]"
+        self.status = status
 
 
 class TaskDB(Base):

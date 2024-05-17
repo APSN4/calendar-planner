@@ -24,5 +24,9 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserId(BaseModel):
+    id: int
+
+
 
 

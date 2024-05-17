@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request, Cookie, Depends, Response
 
 from app.database.db import Base, engine
-from app.routers import items, users, registration, login
+from app.routers import items, users, registration, login, event
 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -46,6 +46,7 @@ async def read_item(request: Request, token: str = Depends(verify_token)):
 async def exit_user():
     response_redirect = RedirectResponse(url="/login", status_code=303)
     response_redirect.delete_cookie(key="token")
+    response_redirect.delete_cookie(key="user_id")
     return response_redirect
 
 @app.on_event("startup")
@@ -57,3 +58,4 @@ app.include_router(items.router, prefix="/api/items")
 app.include_router(users.router, prefix="/api/users")
 app.include_router(registration.router, prefix="/register")
 app.include_router(login.router, prefix="/login")
+app.include_router(event.router, prefix="/event")

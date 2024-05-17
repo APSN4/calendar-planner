@@ -27,6 +27,7 @@ async def login_user(response: Response, email: str = Form(...), password: str =
     if user_bd is not None and user_bd.password == password:
         response_redirect = RedirectResponse(url="/", status_code=303)
         response_redirect.set_cookie(key="token", value=calculate_md5(f"{email}:{password}"))
+        response_redirect.set_cookie(key="user_id", value=user_bd.id)
         return response_redirect
     else:
         response_redirect = RedirectResponse(url="/login/?error=auth", status_code=303)

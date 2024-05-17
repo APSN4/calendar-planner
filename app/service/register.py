@@ -8,4 +8,4 @@ from app.service.crud import create_user
 
 
 def register(db: Session, user_data: UserCreate):
-    create_user(db, user_data)
+    return create_user(db, user_data)

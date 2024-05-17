@@ -86,10 +86,16 @@
     <div class="modal" id="modal">
         <div class="modal-content">
             <h2>Добавить событие</h2>
-            <input type="text" id="eventTitle" placeholder="Название события">
-            <input type="date" id="eventDate">
-            <button onclick="addEvent()">Добавить</button>
-            <button onclick="closeModal()">Закрыть</button>
+            <form action="/event" method="post">
+                <input type="date" name="date" id="eventDate">
+                <input type="time" name="time" placeholder="Время">
+                <input type="text" name="place" placeholder="Место">
+                <input type="number" name="budget" placeholder="Бюджет">
+                <input type="text" name="description" placeholder="Описание">
+
+                <button type="submit">Добавить</button>
+                <button onclick="closeModal()">Закрыть</button>
+            </form>
         </div>
     </div>
 

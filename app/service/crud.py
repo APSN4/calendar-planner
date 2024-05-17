@@ -1,5 +1,5 @@
 from app.database.db import UserDB, EventDB, TaskDB
-from app.models.event import Event
+from app.models.event import Event, EventCreate
 from app.models.task import Task
 from app.models.user import User, UserCreate
 import json
@@ -34,6 +34,7 @@ def update_user(db_session, user_id: int, user: User):
     db_user.surname = user.surname
     db_user.email = user.email
     db_user.password = user.password
+    db_user.event_list = user.event_list
     db_session.commit()
     db_session.refresh(db_user)
     return db_user
@@ -47,17 +48,13 @@ def delete_user(db_session, user_id: int):
     return db_user
 
 
-def create_event(db_session, event: Event):
+def create_event(db_session, event: EventCreate):
     db_event = EventDB(
         date=event.date,
         time=event.time,
         place=event.place,
         budget=event.budget,
         description=event.description,
-        task_list=json.dumps(event.task_list),  # Convert list to JSON string
-        progress_bar=event.progress_bar,
-        alert=json.dumps(event.alert),  # Convert list to JSON string
-        status=event.status
     )
     db_session.add(db_event)
     db_session.commit()
