@@ -8,5 +8,8 @@ class User(BaseModel):
     password: str
     event_list: list = []
 
+    class Config:
+        orm_mode = True
+
 
 

@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  postgresql_db:
+    container_name: calendar_postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=admin
+    image: postgres:14.3-alpine

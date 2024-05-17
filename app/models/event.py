@@ -11,3 +11,6 @@ class Event(BaseModel):
     progress_bar: int  # [0-100]
     alert: list[int] = []
     status: int  # 0, 1, 2
+
+    class Config:
+        orm_mode = True
