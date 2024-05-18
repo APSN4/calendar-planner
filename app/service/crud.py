@@ -1,6 +1,6 @@
 from app.database.db import UserDB, EventDB, TaskDB
-from app.models.event import Event, EventCreate
-from app.models.task import Task
+from app.models.event import Event, EventCreate, EventUpdate
+from app.models.task import Task, TaskCreate
 from app.models.user import User, UserCreate
 import json
 
@@ -86,6 +86,16 @@ def update_event(db_session, event_id: int, event: Event):
     return db_event
 
 
+def update_event_tasks_list(db_session, event_id: int, event: EventUpdate):
+    db_event = get_event(db_session, event_id)
+    if db_event is None:
+        return None
+    db_event.task_list = json.dumps(event.task_list)
+    db_session.commit()
+    db_session.refresh(db_event)
+    return db_event
+
+
 def delete_event(db_session, event_id: int):
     db_event = get_event(db_session, event_id)
     if db_event:
@@ -94,10 +104,9 @@ def delete_event(db_session, event_id: int):
     return db_event
 
 
-def create_task(db_session, task: Task):
+def create_task(db_session, task: TaskCreate):
     db_task = TaskDB(
-        description=json.dumps(task.description),  # Convert list to JSON string
-        completed=task.completed
+        description=task.description,
     )
     db_session.add(db_task)
     db_session.commit()

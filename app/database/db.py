@@ -74,3 +74,7 @@ class TaskDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     description = Column(String)  # We'll store the description list as a JSON string
     completed = Column(Boolean, default=False)
+
+    def __init__(self, description, completed=False):
+        self.description = json.dumps(description, ensure_ascii=False) if description is not None else "[]"
+        self.completed = completed

@@ -28,3 +28,10 @@ class EventCreate(BaseModel):
 class EventDelete(BaseModel):
     id: int
 
+
+class EventGet(BaseModel):
+    id: int
+
+
+class EventUpdate(BaseModel):
+    task_list: list = []

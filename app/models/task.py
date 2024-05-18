@@ -7,3 +7,7 @@ class Task(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TaskCreate(BaseModel):
+    description: str
