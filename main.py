@@ -59,11 +59,13 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
 
     scheme_entities_list = [
         {
+            "event_id": event_entity.id,
             "date": event_entity.date,
             "time": event_entity.time,
             "place": event_entity.place,
             "budget": event_entity.budget,
             "description": event_entity.description,
+            "reminder_time": event_entity.alert
         }
         for event_entity in events_entities
     ]

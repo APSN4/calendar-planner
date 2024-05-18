@@ -54,7 +54,7 @@ class EventDB(Base):
     description = Column(String)
     task_list = Column(String)  # We'll store the task list as a JSON string
     progress_bar = Column(Integer)
-    alert = Column(String)  # We'll store the alert list as a JSON string
+    alert = Column(String)
     status = Column(Integer)
 
     def __init__(self, date, time, place, budget, description, task_list=None, progress_bar=0, alert=None, status=0):
@@ -65,7 +65,7 @@ class EventDB(Base):
         self.description = description
         self.task_list = json.dumps(task_list) if task_list is not None else "[]"
         self.progress_bar = progress_bar
-        self.alert = json.dumps(alert) if alert is not None else "[]"
+        self.alert = alert
         self.status = status
 
 

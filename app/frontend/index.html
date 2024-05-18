@@ -117,6 +117,18 @@
                 <input type="text" name="place" placeholder="Место">
                 <input type="number" name="budget" placeholder="Бюджет">
                 <input type="text" name="description" placeholder="Описание">
+                <label>Напоминание:</label>
+                <select name="reminder_time">
+                    <option value="none">Нет</option>
+                    <option value="0">Во время мероприятия</option>
+                    <option value="5">5 минут заранее</option>
+                    <option value="10">10 минут заранее</option>
+                    <option value="15">15 минут заранее</option>
+                    <option value="30">30 минут заранее</option>
+                    <option value="60">1 час заранее</option>
+                    <option value="120">2 часа заранее</option>
+                    <option value="1440">1 день заранее</option>
+                </select>
 
                 <button type="submit">Добавить</button>
             </form>
@@ -133,6 +145,22 @@
                 <input type="text" name="place" placeholder="Место" disabled>
                 <input type="number" name="budget" placeholder="Бюджет" disabled>
                 <input type="text" name="description" placeholder="Описание" disabled>
+                <label>Напоминание:</label>
+                <select name="reminder_time">
+                    <option value="none">Нет</option>
+                    <option value="0">Во время мероприятия</option>
+                    <option value="5">5 минут заранее</option>
+                    <option value="10">10 минут заранее</option>
+                    <option value="15">15 минут заранее</option>
+                    <option value="30">30 минут заранее</option>
+                    <option value="60">1 час заранее</option>
+                    <option value="120">2 часа заранее</option>
+                    <option value="1440">1 день заранее</option>
+                </select>
+            </form>
+            <form action="/event/delete" method="post">
+                <input type="hidden" name="event_id">
+                <button type="submit">Удалить</button>
             </form>
             <button onclick="closeModal()">Закрыть</button>
         </div>
@@ -210,6 +238,8 @@
             document.querySelector('#modal-exist input[name="place"]').value = event.place;
             document.querySelector('#modal-exist input[name="budget"]').value = event.budget;
             document.querySelector('#modal-exist input[name="description"]').value = event.description;
+            document.querySelector('#modal-exist select[name="reminder_time"]').value = event.reminder_time || 'none';
+            document.querySelector('#modal-exist input[name="event_id"]').value = event.event_id;
             modalExist.style.display = 'flex';
         }
 
@@ -226,13 +256,46 @@
         var events_list = {{ events|safe }} // передается из fastapi
 
 
-
-
         function updateCalendar() {
             const year = document.getElementById('yearSelect').value;
             const month = document.getElementById('monthSelect').value;
             createCalendar(parseInt(year), parseInt(month));
         }
+
+        function showReminder(date) {
+            alert("Напоминание: Пора выполнить задачу! Дата задачи: " + date);
+        }
+
+        function checkAndShowReminder() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const day = now.getDate();
+            const currentTimeStr = now.toTimeString().slice(0, 5);
+
+            const event = getEventByDate(year, month, day);
+            if (event) {
+                const eventDateTime = new Date(`${event.date}T${event.time}`);
+                const reminderTime = event.reminder_time;
+
+                if (reminderTime !== 'none') {
+                    const reminderOffset = parseInt(reminderTime) * 60000; // Перевод минут в миллисекунды
+                    const reminderDateTime = new Date(eventDateTime.getTime() - reminderOffset);
+                    const reminderTimeStr = reminderDateTime.toTimeString().slice(0, 5);
+
+                    console.log(`Current Time: ${currentTimeStr}`);
+                    console.log(`Reminder Time: ${reminderTimeStr}`);
+
+                    if (currentTimeStr === reminderTimeStr) {
+                        showReminder(event.date);
+                    }
+                } else if (currentTimeStr === event.time) {
+                    showReminder(event.date);
+                }
+            }
+        }
+
+        setInterval(checkAndShowReminder, 60000); // Проверка каждую минуту
 
         document.addEventListener('DOMContentLoaded', () => {
             populateYearSelect(2020, 2030); // Populate years from 2020 to 2030

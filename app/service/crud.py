@@ -56,6 +56,7 @@ def create_event(db_session, event: EventCreate):
         place=event.place,
         budget=event.budget,
         description=event.description,
+        alert=event.alert,
     )
     db_session.add(db_event)
     db_session.commit()

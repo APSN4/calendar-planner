@@ -9,7 +9,7 @@ class Event(BaseModel):
     description: str
     task_list: list = []
     progress_bar: int  # [0-100]
-    alert: int
+    alert: str
     status: int  # 0, 1, 2
 
     class Config:
@@ -22,4 +22,9 @@ class EventCreate(BaseModel):
     place: str
     budget: int
     description: str
+    alert: str
+
+
+class EventDelete(BaseModel):
+    id: int
 
