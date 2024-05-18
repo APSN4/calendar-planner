@@ -26,11 +26,11 @@ def verify_user_id(user_id: str = Cookie(None)):
 
 
 @router.post("/")
-async def event_create(token: str = Depends(verify_user_id), date: str = Form(...), time: str = Form(...), place: str = Form(...), budget: str = Form(...), description: str = Form(...)):
+async def event_create(user_id: str = Depends(verify_user_id), date: str = Form(...), time: str = Form(...), place: str = Form(...), budget: str = Form(...), description: str = Form(...)):
     event = EventCreate(date=date, time=time, place=place, budget=budget, description=description)
     new_event = create_event_db(next(get_db()), event)
     try:
-        user_id = token.title()
+        user_id = user_id.title()
     except Exception as e:
         return RedirectResponse(url="/")
     user = UserId(id=user_id)

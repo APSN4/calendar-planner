@@ -1,13 +1,19 @@
+import json
 import logging
 
 from fastapi import FastAPI, Request, Cookie, Depends, Response
 
-from app.database.db import Base, engine
+from app.database.db import Base, engine, get_db
+from app.models.user import UserId
 from app.routers import items, users, registration, login, event
 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+
+from app.routers.event import verify_user_id
+from app.service.crud import get_event
+from app.service.event import get_user_by_id, parse_pg_array
 
 """
 
@@ -33,13 +39,37 @@ def verify_token(token: str = Cookie(None)):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def read_item(request: Request, token: str = Depends(verify_token)):
+async def read_item(request: Request, token: str = Depends(verify_token), user_id: str = Depends(verify_user_id)):
     try:
         cookie = token.title()
     except Exception as e:
         return RedirectResponse(url="/login")
+
+    try:
+        user_id = user_id.title()
+    except Exception as e:
+        return RedirectResponse(url="/")
+    user = UserId(id=user_id)
+    user_bd = get_user_by_id(next(get_db()), user)
+    event_list = json.loads(str(parse_pg_array(user_bd.event_list)))
+    events_entities = []
+    for event_id in event_list:
+        entity = get_event(next(get_db()), event_id)
+        events_entities.append(entity)
+
+    scheme_entities_list = [
+        {
+            "date": event_entity.date,
+            "time": event_entity.time,
+            "place": event_entity.place,
+            "budget": event_entity.budget,
+            "description": event_entity.description,
+        }
+        for event_entity in events_entities
+    ]
+
     return templates.TemplateResponse(
-        request=request, name="index.html"
+        request=request, name="index.html", context={"events": scheme_entities_list}
     )
 
 @app.post("/exit")
