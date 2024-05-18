@@ -30,6 +30,7 @@ def update_user(db_session, user_id: int, user: User):
     db_user = get_user(db_session, user_id)
     if db_user is None:
         return None
+    print(user)
     db_user.name = user.name
     db_user.surname = user.surname
     db_user.email = user.email

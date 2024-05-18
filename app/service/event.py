@@ -17,4 +17,14 @@ def get_user_by_id(db: Session, user_data: UserId):
 
 
 def update_user_db(db: Session, user_id: int, user_data: User):
-    update_user(db, user_id, user_data)
+    print(user_data.email)
+    return update_user(db, user_id, user_data)
+
+
+def parse_pg_array(pg_array_str):
+    # Удаляем фигурные скобки и разделяем по запятой
+    if pg_array_str.startswith('{') and pg_array_str.endswith('}'):
+        pg_array_str = pg_array_str[1:-1]
+    if pg_array_str:
+        return list(map(int, pg_array_str.split(',')))
+    return []
