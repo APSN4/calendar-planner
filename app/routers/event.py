@@ -43,7 +43,10 @@ async def event_create(user_id: str = Depends(verify_user_id), date: str = Form(
         return RedirectResponse(url="/")
     user = UserId(id=user_id)
     user_bd = get_user_by_id(next(get_db()), user)
-    event_list = json.loads(str(parse_pg_array(user_bd.event_list)))
+    try:
+        event_list = json.loads(str(parse_pg_array(user_bd.event_list)))
+    except Exception as e:
+        event_list = []
     event_list.append(new_event.id)
     user_bd.event_list = event_list
     update_user_db(next(get_db()), int(user_id), user_bd)

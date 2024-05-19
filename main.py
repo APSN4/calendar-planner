@@ -53,7 +53,10 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
         return RedirectResponse(url="/")
     user = UserId(id=user_id)
     user_bd = get_user_by_id(next(get_db()), user)
-    event_list = json.loads(str(parse_pg_array(user_bd.event_list)))
+    try:
+        event_list = json.loads(str(parse_pg_array(user_bd.event_list)))
+    except Exception as e:
+        event_list = []
     events_entities = []
     for event_id in event_list:
         entity = get_event(next(get_db()), event_id)
