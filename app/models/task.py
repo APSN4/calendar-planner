@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 
 class Task(BaseModel):
-    description: list[dict] = []
+    id: int
+    description: str
     completed: bool = False
 
     class Config:

@@ -9,7 +9,7 @@ from app.constant.constant import DB_USER, DB_PASSWORD
 SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/postgres"
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    SQLALCHEMY_DATABASE_URL, pool_size=20, max_overflow=0
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

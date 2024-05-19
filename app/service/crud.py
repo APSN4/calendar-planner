@@ -122,7 +122,7 @@ def update_task(db_session, task_id: int, task: Task):
     db_task = get_task(db_session, task_id)
     if db_task is None:
         return None
-    db_task.description = json.dumps(task.description)
+    db_task.description = task.description
     db_task.completed = task.completed
     db_session.commit()
     db_session.refresh(db_task)

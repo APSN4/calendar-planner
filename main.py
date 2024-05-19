@@ -84,7 +84,7 @@ def get_tasks_for_event(db_session, task_list: str) -> List[Dict[str, any]]:
     tasks = []
     for task_id in tasks_list:
         task = get_task_db(db_session, task_id)
-        tasks.append({"description": task.description, "completed": str(task.completed).lower()})
+        tasks.append({"id": task.id, "description": task.description, "completed": str(task.completed).lower()})
     return tasks
 
 

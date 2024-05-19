@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from fastapi import APIRouter, Request, Form, Depends, Cookie
+from fastapi import APIRouter, Request, Form, Depends, Cookie, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -59,10 +59,12 @@ class UpdateTasksRequest(BaseModel):
 
 @router.post("/task/update")
 async def update_tasks(request: UpdateTasksRequest):
-    update_task_db(next(get_db()), request.checkboxes)
-
-    response_redirect = RedirectResponse(url="/", status_code=303)
-    return response_redirect
+    try:
+        update_task_db(next(get_db()), request.checkboxes)
+        response_redirect = RedirectResponse(url="/", status_code=303)
+        return response_redirect
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/task")

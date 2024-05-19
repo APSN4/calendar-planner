@@ -228,7 +228,6 @@
                 <button type="submit">Удалить</button>
             </form>
             <button onclick="closeModal()">Закрыть</button>
-            <h3>Задачи:</h3>
             <!-- Контейнер для задач -->
             <div class="task-container"></div>
             <!-- Кнопка Сохранить -->
@@ -342,7 +341,7 @@
             document.querySelector('#modal-exist select[name="reminder_time"]').value = event.reminder_time || 'none';
             document.querySelector('#modal-exist input[name="event_id"]').value = event.event_id;
             // Находим элемент, куда будем добавлять чекбоксы
-            var tasksContainer = document.querySelector('.modal-content-exist');
+            var tasksContainer = document.querySelector('.task-container');
 
             // Очищаем все задачи
             tasksContainer.querySelectorAll('.task-row').forEach(function(taskRow) {
@@ -376,16 +375,20 @@
                 description.textContent = task.description;
                 description.style.marginRight = '10px'; // Добавляем отступ справа для текста
 
+                // Создаем скрытое поле для id
+                var hiddenId = document.createElement('input');
+                hiddenId.type = 'hidden';
+                hiddenId.value = task.id;
+
                 // Создаем чекбокс
                 var checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                if (task.completed === true) {
-                    checkbox.checked = true;
-                }  // Используем значение completed для установки состояния чекбокса
+                checkbox.checked = task.completed === 'true' || task.completed === true; // Устанавливаем состояние чекбокса
 
                 // Добавляем описание задачи и чекбокс в элемент задачи
                 taskItem.appendChild(description);
                 taskItem.appendChild(checkbox);
+                taskItem.appendChild(hiddenId);
 
                 // Добавляем элемент задачи в контейнер всех задач
                 taskContainer.appendChild(taskItem);
@@ -406,7 +409,8 @@
             const tasks = Array.from(taskItems).map(taskItem => {
                 const description = taskItem.querySelector('span').textContent;
                 const completed = taskItem.querySelector('input[type="checkbox"]').checked;
-                return { description, completed };
+                const id = taskItem.querySelector('input[type="hidden"]').value; // Извлекаем значение id из скрытого поля
+                return { id, description, completed };
             });
 
             fetch('event/task/update', {
@@ -420,9 +424,14 @@
                 if (response.ok) {
                     alert('Tasks updated successfully!');
                     closeModal(); // Закрыть модальное окно после сохранения
+                    location.reload(); // страницу перезагрузить
                 } else {
                     alert('Failed to update tasks.');
-                    console.log(tasks)
+                    response.json().then(data => {
+                        alert('Failed to update tasks.');
+                        console.log(tasks);
+                        console.log(data);  // Log the response body for debugging
+                    });
                 }
             })
             .catch(error => {
