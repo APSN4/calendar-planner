@@ -11,7 +11,6 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from starlette.responses import FileResponse
 
-from app.constant.constant import UPLOAD_DIR
 from app.database.db import get_db
 from app.models.event import EventCreate, EventDelete, EventGet, EventUpdate, EventUpdatePost, UploadFileEvent, \
     GetFileEvent

@@ -2,7 +2,11 @@ import json
 import logging
 from typing import List, Dict
 
-from fastapi import FastAPI, Request, Cookie, Depends, Response
+from fastapi import FastAPI, Request, Cookie, Depends, Query
+
+from fastapi.responses import JSONResponse
+from fuzzywuzzy import process
+from sqlalchemy.orm import Session
 
 from app.database.db import Base, engine, get_db, TaskDB
 from app.models.user import UserId
@@ -31,6 +35,8 @@ templates = Jinja2Templates(directory="app/frontend")
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
+data_search = []
+
 
 def verify_token(token: str = Cookie(None)):
     """
@@ -43,6 +49,7 @@ def verify_token(token: str = Cookie(None)):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request, token: str = Depends(verify_token), user_id: str = Depends(verify_user_id)):
+    global data_search
     try:
         cookie = token.title()
     except Exception as e:
@@ -78,6 +85,7 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
         for event_entity in events_entities
     ]
     print(scheme_entities_list)
+    data_search = scheme_entities_list
 
     return templates.TemplateResponse(
         request=request, name="index.html", context={"events": scheme_entities_list}
@@ -85,21 +93,25 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
 
 
 def get_files_for_event(file_ids_str):
-    # Преобразуем строку с массивом чисел в список
-    file_ids = [int(id_str) for id_str in file_ids_str[1:-1].split(', ')]
+    try:
+        # Преобразуем строку с массивом чисел в список
+        file_ids = [int(id_str) for id_str in file_ids_str[1:-1].split(', ')]
 
-    # Используем генератор списка для создания списка объектов файлов
-    return [
-        {
-            "id": file_db.id,
-            "filename": file_db.filename
-        }
-        for file_id in file_ids
-        if (file_db := get_file_db(next(get_db()), file_id))
-    ]
+        # Используем генератор списка для создания списка объектов файлов
+        return [
+            {
+                "id": file_db.id,
+                "filename": file_db.filename
+            }
+            for file_id in file_ids
+            if (file_db := get_file_db(next(get_db()), file_id))
+        ]
+    except Exception as e:
+        print(e)
+        return []
 
 
-def get_tasks_for_event(db_session, task_list: str) -> List[Dict[str, any]]:
+def get_tasks_for_event(db_session: Session, task_list: str) -> List[Dict[str, any]]:
     tasks_list = json.loads(task_list)
     tasks = []
     for task_id in tasks_list:
@@ -114,6 +126,26 @@ async def exit_user():
     response_redirect.delete_cookie(key="token")
     response_redirect.delete_cookie(key="user_id")
     return response_redirect
+
+
+@app.get("/search")
+async def search(q: str = Query(..., min_length=1)):
+    # Подготавливаем данные для поиска
+    combined_search_data = [
+        (
+            f"{event_search['date']} {event_search['time']} {event_search['place']} {event_search['budget']} {event_search['description']} {event_search['reminder_time']}",
+            event_search
+        )
+        for event_search in data_search
+    ]
+
+    # Выполняем поиск
+    results = process.extract(q, combined_search_data, limit=5)
+
+    # Извлекаем результаты
+    matched_entities = [result[0][1] for result in results]
+
+    return JSONResponse(matched_entities)
 
 
 @app.on_event("startup")

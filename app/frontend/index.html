@@ -197,6 +197,10 @@
 
     <div class="calendar" id="calendar"></div>
 
+    <h1>Поиск</h1>
+    <input type="text" id="search" placeholder="Начните вводить..." oninput="performSearch()">
+    <ul class="results" id="results"></ul>
+
     <div class="modal" id="modal">
         <div class="modal-content">
             <h2>Добавить событие</h2>
@@ -605,7 +609,41 @@
             }
         }
 
-        setInterval(checkAndShowReminder, 60000); // Проверка каждую минуту
+        async function performSearch() {
+            const query = document.getElementById('search').value;
+            if (query.length > 0) {
+                const response = await fetch(`/search?q=${query}`);
+                const results = await response.json();
+                displayResults(results, query);
+            } else {
+                document.getElementById('results').innerHTML = '';
+            }
+        }
+
+        function displayResults(results, query) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            results.forEach(result => {
+                const li = document.createElement('li');
+                const highlightedText = highlightQuery(result.description, query);
+                li.innerHTML = `
+                    <div>Дата: ${highlightQuery(result.date, query)}</div>
+                    <div>Время: ${highlightQuery(result.time, query)}</div>
+                    <div>Место: ${highlightQuery(result.place, query)}</div>
+                    <div>Бюджет: ${highlightQuery(result.budget.toString(), query)}</div>
+                    <div>Описание: ${highlightedText}</div>
+                    <div>Напоминание: ${highlightQuery(result.reminder_time, query)}</div>
+                `;
+                resultsContainer.appendChild(li);
+            });
+        }
+
+        function highlightQuery(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        setInterval(checkAndShowReminder, 15000); // Проверка каждые 10с
 
         document.addEventListener('DOMContentLoaded', () => {
             populateYearSelect(2020, 2030); // Populate years from 2020 to 2030

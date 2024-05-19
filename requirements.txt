@@ -1,4 +1,8 @@
-fastapi
-sqlalchemy
+fastapi~=0.111.0
+sqlalchemy~=2.0.30
 psycopg2-binary
 jinja2
+pydantic~=2.7.1
+starlette~=0.37.2
+python-dotenv~=1.0.1
+fuzzywuzzy~=0.18.0
