@@ -229,11 +229,11 @@
         <div class="modal-content-exist">
             <h2>Информация о событии</h2>
             <form>
-                <input type="date" name="date" id="eventDateExist" disabled>
-                <input type="time" name="time" placeholder="Время" disabled>
-                <input type="text" name="place" placeholder="Место" disabled>
-                <input type="number" name="budget" placeholder="Бюджет" disabled>
-                <input type="text" name="description" placeholder="Описание" disabled>
+                <input type="date" name="date" id="eventDateExist">
+                <input type="time" name="time" placeholder="Время">
+                <input type="text" name="place" placeholder="Место">
+                <input type="number" name="budget" placeholder="Бюджет">
+                <input type="text" name="description" placeholder="Описание">
                 <label>Напоминание:</label>
                 <select name="reminder_time">
                     <option value="none">Нет</option>
@@ -372,14 +372,12 @@
             // Находим элемент, куда будем добавлять чекбоксы
             var tasksContainer = document.querySelector('.task-container');
             var progressContainer = document.getElementById('progress-bar-container');
-            var saveButton = document.getElementById('btm_save');
 
             // Очищаем все задачи
             tasksContainer.querySelectorAll('.task-row').forEach(function(taskRow) {
                 taskRow.remove();
             });
             progressContainer.style.display = 'none';
-            saveButton.style.display = 'none'
 
             // Создаем заголовок для задач, если его еще нет
             var tasksHeader = tasksContainer.querySelector('h3');
@@ -429,7 +427,6 @@
 
                 progressContainer.style.display = 'block';
                 tasksHeader.style.display = 'block'
-                saveButton.style.display = 'block'
             });
 
             // Добавляем контейнер всех задач в общий контейнер для строк с задачами
@@ -456,6 +453,12 @@
 
         function saveTasks() {
             const event_id = document.querySelector('#modal-exist input[name="event_id"]').value;
+            const date = document.querySelector('#modal-exist input[name="date"]').value;
+            const time = document.querySelector('#modal-exist input[name="time"]').value;
+            const place = document.querySelector('#modal-exist input[name="place"]').value;
+            const budget = document.querySelector('#modal-exist input[name="budget"]').value;
+            const description = document.querySelector('#modal-exist input[name="description"]').value;
+            const reminder_time = document.querySelector('#modal-exist select[name="reminder_time"]').value
             const taskItems = document.querySelectorAll('.task-item');
 
             const tasks = Array.from(taskItems).map(taskItem => {
@@ -465,29 +468,54 @@
                 return { id, description, completed };
             });
 
-            fetch('event/task/update', {
+            if (tasks.length > 0) {
+                fetch('event/task/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({event_id, checkboxes: tasks}),
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Tasks updated successfully!');
+                            closeModal(); // Закрыть модальное окно после сохранения
+                        } else {
+                            alert('Failed to update tasks.');
+                            response.json().then(data => {
+                                alert('Failed to update tasks.');
+                                console.log(tasks);
+                                console.log(data);  // Log the response body for debugging
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating tasks.');
+                    });
+            }
+
+            fetch('event/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ event_id, checkboxes: tasks }),
+                body: JSON.stringify({ event_id, date, time, place, budget, description, alert: reminder_time }),
             })
             .then(response => {
                 if (response.ok) {
-                    alert('Tasks updated successfully!');
+                    alert('Event updated successfully!');
                     closeModal(); // Закрыть модальное окно после сохранения
                 } else {
-                    alert('Failed to update tasks.');
+                    alert('Failed to update event.');
                     response.json().then(data => {
-                        alert('Failed to update tasks.');
-                        console.log(tasks);
-                        console.log(data);  // Log the response body for debugging
+                        console.error('Failed to update event.', data);
                     });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while updating tasks.');
+                alert('An error occurred while updating event.');
             });
         }
 

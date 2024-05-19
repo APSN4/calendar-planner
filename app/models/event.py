@@ -25,6 +25,16 @@ class EventCreate(BaseModel):
     alert: str
 
 
+class EventUpdatePost(BaseModel):
+    event_id: int
+    date: str
+    time: str
+    place: str
+    budget: int
+    description: str
+    alert: str
+
+
 class EventDelete(BaseModel):
     id: int
 

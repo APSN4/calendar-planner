@@ -7,11 +7,12 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from app.database.db import get_db
-from app.models.event import EventCreate, EventDelete, EventGet
+from app.models.event import EventCreate, EventDelete, EventGet, EventUpdate, EventUpdatePost
 from app.models.task import TaskCreate, Task
 from app.models.user import User, UserCreate, UserId
 from app.service.crud import delete_event, update_event_tasks_list
-from app.service.event import create_event_db, get_user_by_id, update_user_db, parse_pg_array, get_event_db
+from app.service.event import create_event_db, get_user_by_id, update_user_db, parse_pg_array, get_event_db, \
+    update_event_db
 from app.service.md5 import calculate_md5
 from app.service.register import register
 from fastapi.responses import RedirectResponse
@@ -50,6 +51,15 @@ async def event_create(user_id: str = Depends(verify_user_id), date: str = Form(
     event_list.append(new_event.id)
     user_bd.event_list = event_list
     update_user_db(next(get_db()), int(user_id), user_bd)
+
+    response_redirect = RedirectResponse(url="/", status_code=303)
+    return response_redirect
+
+
+@router.post("/update")
+async def event_create(event_data: EventUpdatePost):
+    event = EventCreate(date=event_data.date, time=event_data.time, place=event_data.place, budget=event_data.budget, description=event_data.description, alert=str(event_data.alert))
+    event_update = update_event_db(next(get_db()), int(event_data.event_id), event)
 
     response_redirect = RedirectResponse(url="/", status_code=303)
     return response_redirect

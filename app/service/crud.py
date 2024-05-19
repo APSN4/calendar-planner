@@ -86,6 +86,21 @@ def update_event(db_session, event_id: int, event: Event):
     return db_event
 
 
+def update_event_exist(db_session, event_id: int, event: EventCreate):
+    db_event = get_event(db_session, event_id)
+    if db_event is None:
+        return None
+    db_event.date = event.date
+    db_event.time = event.time
+    db_event.place = event.place
+    db_event.budget = event.budget
+    db_event.description = event.description
+    db_event.alert = event.alert
+    db_session.commit()
+    db_session.refresh(db_event)
+    return db_event
+
+
 def update_event_tasks_list(db_session, event_id: int, event: EventUpdate):
     db_event = get_event(db_session, event_id)
     if db_event is None:
