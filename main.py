@@ -15,6 +15,7 @@ from fastapi.responses import RedirectResponse
 from app.routers.event import verify_user_id
 from app.service.crud import get_event
 from app.service.event import get_user_by_id, parse_pg_array
+from app.service.file import get_file_db
 from app.service.task import get_task_db
 
 """
@@ -71,7 +72,8 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
             "budget": event_entity.budget,
             "description": event_entity.description,
             "reminder_time": event_entity.alert,
-            "tasks": get_tasks_for_event(next(get_db()), event_entity.task_list)
+            "tasks": get_tasks_for_event(next(get_db()), event_entity.task_list),
+            "files": get_files_for_event(event_entity.files)
         }
         for event_entity in events_entities
     ]
@@ -80,6 +82,21 @@ async def read_item(request: Request, token: str = Depends(verify_token), user_i
     return templates.TemplateResponse(
         request=request, name="index.html", context={"events": scheme_entities_list}
     )
+
+
+def get_files_for_event(file_ids_str):
+    # Преобразуем строку с массивом чисел в список
+    file_ids = [int(id_str) for id_str in file_ids_str[1:-1].split(', ')]
+
+    # Используем генератор списка для создания списка объектов файлов
+    return [
+        {
+            "id": file_db.id,
+            "filename": file_db.filename
+        }
+        for file_id in file_ids
+        if (file_db := get_file_db(next(get_db()), file_id))
+    ]
 
 
 def get_tasks_for_event(db_session, task_list: str) -> List[Dict[str, any]]:

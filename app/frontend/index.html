@@ -247,25 +247,27 @@
                     <option value="1440">1 день заранее</option>
                 </select>
             </form>
-            <button onclick="openModalTask()">Добавить задачу</button>
-            <form action="/event/delete" method="post">
-                <input type="hidden" name="event_id">
-                <button type="submit">Удалить</button>
-            </form>
-            <button onclick="closeModal()">Закрыть</button>
             <div id="progress-bar-container">
                 <div id="progress-bar"></div>
                 <div id="progress-text">0%</div>
             </div>
-            <form action="event/file/upload" method="post" enctype="multipart/form-data">
-                <input type="text" name="event_id" placeholder="Event ID">
-                <input type="file" name="file">
-                <button type="submit">Upload File</button>
-            </form>
             <!-- Контейнер для задач -->
             <div class="task-container"></div>
             <!-- Кнопка Сохранить -->
             <button id="btm_save" onclick="saveTasks()">Сохранить</button>
+            <!-- Контейнер для файлов -->
+            <div class="files-container"></div>
+            <form action="event/file/upload" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="event_id">
+                <input type="file" name="file">
+                <button type="submit">Загрузить файл</button>
+            </form>
+            <button onclick="openModalTask()">Добавить задачу</button>
+            <form action="/event/delete" method="post">
+                <input type="hidden" name="event_id">
+                <button type="submit">Удалить событие</button>
+            </form>
+            <button onclick="closeModal()">Закрыть событие</button>
         </div>
     </div>
 
@@ -373,9 +375,16 @@
             document.querySelector('#modal-exist input[name="budget"]').value = event.budget;
             document.querySelector('#modal-exist input[name="description"]').value = event.description;
             document.querySelector('#modal-exist select[name="reminder_time"]').value = event.reminder_time || 'none';
-            document.querySelector('#modal-exist input[name="event_id"]').value = event.event_id;
+            // Получаем все элементы с атрибутом name="event_id"
+            var event_id_inputs = document.querySelectorAll('input[name="event_id"]');
+
+            // Устанавливаем значение event_id для всех найденных элементов
+            event_id_inputs.forEach(function(input) {
+                input.value = event.event_id;
+            });
             // Находим элемент, куда будем добавлять чекбоксы
             var tasksContainer = document.querySelector('.task-container');
+            var filesContainer = document.querySelector('.files-container')
             var progressContainer = document.getElementById('progress-bar-container');
 
             // Очищаем все задачи
@@ -400,6 +409,17 @@
             taskRowContainer.style.alignItems = 'center'; // Выравниваем элементы по вертикали
 
             var taskContainer = document.createElement('div'); // Создаем контейнер для всех задач
+            // Добавляем ссылки для скачивания файлов
+            var filesContainer = document.querySelector('.files-container');
+            filesContainer.innerHTML = ''; // Очищаем контейнер перед добавлением новых ссылок
+
+            event.files.forEach(function(file) {
+                var fileLink = document.createElement('a');
+                fileLink.href = `event/file/download?file_id=${file.id}&event_id=${event.event_id}`; // Передаем file_id и event_id в URL
+                fileLink.textContent = file.filename; // Имя файла
+                fileLink.style.display = 'block'; // Отображаем ссылку на новой строке
+                filesContainer.appendChild(fileLink); // Добавляем ссылку в контейнер
+            });
 
             event.tasks.forEach(function(task) {
                 // Создаем элемент для задачи

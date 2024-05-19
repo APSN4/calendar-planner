@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 import time
 from typing import List
 
@@ -146,11 +147,15 @@ def upload_file(file: UploadFile = File(...), event_id: str = Form(...)):
 
 # Эндпоинт для скачивания файла с сервера
 @router.get("/file/download")
-def download_file(file_id: int = Form(...), event_id: str = Form(...)):
-    # Получаем файл из базы данных по его идентификатору
-    file = GetFileEvent(event_id=int(event_id), file_id=file_id)
-    db_file = get_event_exist_file(next(get_db()), int(event_id), file_id)
+def download_file(file_id: str, event_id: str):
+    db_file = get_event_exist_file(next(get_db()), int(file_id))
     if db_file is None:
         raise HTTPException(status_code=404, detail="File not found")
-    # Возвращаем содержимое файла как файл
-    return FileResponse(db_file[0], filename=db_file[1])
+
+    # Создаем временный файл и записываем в него содержимое файла
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(db_file.content)
+        temp_file_path = temp_file.name
+
+    # Возвращаем содержимое временного файла как файл
+    return FileResponse(temp_file_path, filename=db_file.filename)

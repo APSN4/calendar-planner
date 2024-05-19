@@ -111,9 +111,8 @@ def update_event_exist_file(db_session, event_id: int, event: UploadFileEvent):
     return db_event
 
 
-def get_event_exist_file(db_session, event_id: int, file_id: int):
-    event_db = get_event(db_session, event_id)
-    return event_db.files.get(file_id)
+def get_event_exist_file(db_session, file_id: int):
+    return get_file(db_session, file_id)
 
 
 def update_event_tasks_list(db_session, event_id: int, event: EventUpdate):
