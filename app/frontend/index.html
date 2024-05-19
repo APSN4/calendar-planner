@@ -146,6 +146,31 @@
         margin-right: 5px; /* Уменьшаем отступ между чекбоксом и текстом */
     }
 
+    #progress-bar-container {
+        width: 100%;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    #progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: #4CAF50;
+        border-radius: 10px;
+    }
+
+    #progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: black;
+        font-size: 14px;
+        font-family: Arial, sans-serif;
+    }
+
 
 
     </style>
@@ -228,10 +253,14 @@
                 <button type="submit">Удалить</button>
             </form>
             <button onclick="closeModal()">Закрыть</button>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+                <div id="progress-text">0%</div>
+            </div>
             <!-- Контейнер для задач -->
             <div class="task-container"></div>
             <!-- Кнопка Сохранить -->
-            <button onclick="saveTasks()">Сохранить</button>
+            <button id="btm_save" onclick="saveTasks()">Сохранить</button>
         </div>
     </div>
 
@@ -342,11 +371,15 @@
             document.querySelector('#modal-exist input[name="event_id"]').value = event.event_id;
             // Находим элемент, куда будем добавлять чекбоксы
             var tasksContainer = document.querySelector('.task-container');
+            var progressContainer = document.getElementById('progress-bar-container');
+            var saveButton = document.getElementById('btm_save');
 
             // Очищаем все задачи
             tasksContainer.querySelectorAll('.task-row').forEach(function(taskRow) {
                 taskRow.remove();
             });
+            progressContainer.style.display = 'none';
+            saveButton.style.display = 'none'
 
             // Создаем заголовок для задач, если его еще нет
             var tasksHeader = tasksContainer.querySelector('h3');
@@ -355,6 +388,7 @@
                 tasksHeader.textContent = 'Задачи:';
                 tasksContainer.appendChild(tasksHeader);
             }
+            tasksHeader.style.display = 'none'
 
             // Создаем новую строку для задач
             var taskRowContainer = document.createElement('div');
@@ -392,12 +426,30 @@
 
                 // Добавляем элемент задачи в контейнер всех задач
                 taskContainer.appendChild(taskItem);
+
+                progressContainer.style.display = 'block';
+                tasksHeader.style.display = 'block'
+                saveButton.style.display = 'block'
             });
 
             // Добавляем контейнер всех задач в общий контейнер для строк с задачами
             tasksContainer.appendChild(taskContainer);
 
+            // Вычисляем количество выполненных задач
+            var completedTasksCount = event.tasks.reduce(function(total, task) {
+                return total + (task.completed === true || task.completed === 'true' ? 1 : 0);
+            }, 0);
 
+            // Вычисляем процент выполненных задач от общего числа задач
+            var progressPercentage = (completedTasksCount / event.tasks.length) * 100;
+
+            // Находим элемент прогресс-бара
+            var progressBar = document.getElementById('progress-bar');
+            var progressText = document.getElementById('progress-text');
+
+            // Обновляем значение ширины прогресс-бара в соответствии с процентом выполненных задач
+            progressBar.style.width = progressPercentage + '%';
+            progressText.textContent = Math.round(progressPercentage) + '%';
 
             modalExist.style.display = 'flex';
         }
@@ -424,7 +476,6 @@
                 if (response.ok) {
                     alert('Tasks updated successfully!');
                     closeModal(); // Закрыть модальное окно после сохранения
-                    location.reload(); // страницу перезагрузить
                 } else {
                     alert('Failed to update tasks.');
                     response.json().then(data => {
@@ -451,6 +502,7 @@
             document.getElementById('modal').style.display = 'none';
             document.getElementById('modal-exist').style.display = 'none';
             document.getElementById('modal-task').style.display = 'none';
+            location.reload();
         }
 
         function getEventByDate(year, month, day) {
