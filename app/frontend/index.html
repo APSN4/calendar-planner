@@ -257,6 +257,11 @@
                 <div id="progress-bar"></div>
                 <div id="progress-text">0%</div>
             </div>
+            <form action="event/file/upload" method="post" enctype="multipart/form-data">
+                <input type="text" name="event_id" placeholder="Event ID">
+                <input type="file" name="file">
+                <button type="submit">Upload File</button>
+            </form>
             <!-- Контейнер для задач -->
             <div class="task-container"></div>
             <!-- Кнопка Сохранить -->

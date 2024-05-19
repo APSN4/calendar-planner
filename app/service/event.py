@@ -3,9 +3,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_400_BAD_REQUEST
 
-from app.models.event import EventCreate, EventGet, EventUpdate
+from app.models.event import EventCreate, EventGet, EventUpdate, UploadFileEvent, GetFileEvent
 from app.models.user import User, UserCreate, UserId
-from app.service.crud import create_user, create_event, get_user, update_user, get_event, update_event_exist
+from app.service.crud import create_user, create_event, get_user, update_user, get_event, update_event_exist, \
+    update_event_exist_file
 
 
 def create_event_db(db: Session, event_data: EventCreate):
@@ -18,6 +19,14 @@ def get_event_db(db: Session, event_data: EventGet):
 
 def update_event_db(db: Session, event_id: int, user_data: EventCreate):
     return update_event_exist(db, event_id, user_data)
+
+
+def update_event_exist_file_db(db: Session, event_id: int, event_data: UploadFileEvent):
+    return update_event_exist_file(db, event_id, event_data)
+
+
+def get_event_exist_file_db(db: Session, event_id: int, event_data: GetFileEvent):
+    return update_event_exist_file(db, event_id, event_data)
 
 
 def get_user_by_id(db: Session, user_data: UserId):

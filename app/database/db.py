@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import create_engine, Column, String, Integer, Boolean
+from sqlalchemy import create_engine, Column, String, Integer, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -55,9 +55,9 @@ class EventDB(Base):
     task_list = Column(String)  # We'll store the task list as a JSON string
     progress_bar = Column(Integer)
     alert = Column(String)
-    status = Column(Integer)
+    files = Column(String)
 
-    def __init__(self, date, time, place, budget, description, task_list=None, progress_bar=0, alert=None, status=0):
+    def __init__(self, date, time, place, budget, description, task_list=None, progress_bar=0, alert=None, files=None):
         self.date = date
         self.time = time
         self.place = place
@@ -66,7 +66,7 @@ class EventDB(Base):
         self.task_list = json.dumps(task_list) if task_list is not None else "[]"
         self.progress_bar = progress_bar
         self.alert = alert
-        self.status = status
+        self.files = json.dumps(files) if files is not None else "[]"
 
 
 class TaskDB(Base):
@@ -78,3 +78,14 @@ class TaskDB(Base):
     def __init__(self, description, completed=False):
         self.description = json.dumps(description, ensure_ascii=False) if description is not None else "[]"
         self.completed = completed
+
+
+class FileDB(Base):
+    __tablename__ = "files"
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(LargeBinary)
+    filename = Column(String)
+
+    def __init__(self, content, filename):
+        self.content = content
+        self.filename = filename

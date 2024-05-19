@@ -10,7 +10,7 @@ class Event(BaseModel):
     task_list: list = []
     progress_bar: int  # [0-100]
     alert: str
-    status: int  # 0, 1, 2
+    files: list[str] = []
 
     class Config:
         orm_mode = True
@@ -45,3 +45,13 @@ class EventGet(BaseModel):
 
 class EventUpdate(BaseModel):
     task_list: list = []
+
+
+class UploadFileEvent(BaseModel):
+    event_id: int
+    files: list = []
+
+
+class GetFileEvent(BaseModel):
+    event_id: int
+    file_id: int

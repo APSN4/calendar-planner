@@ -1,5 +1,5 @@
-from app.database.db import UserDB, EventDB, TaskDB
-from app.models.event import Event, EventCreate, EventUpdate
+from app.database.db import UserDB, EventDB, TaskDB, FileDB
+from app.models.event import Event, EventCreate, EventUpdate, UploadFileEvent
 from app.models.task import Task, TaskCreate
 from app.models.user import User, UserCreate
 import json
@@ -101,6 +101,21 @@ def update_event_exist(db_session, event_id: int, event: EventCreate):
     return db_event
 
 
+def update_event_exist_file(db_session, event_id: int, event: UploadFileEvent):
+    db_event = get_event(db_session, event_id)
+    if db_event is None:
+        return None
+    db_event.files = json.dumps(event.files)
+    db_session.commit()
+    db_session.refresh(db_event)
+    return db_event
+
+
+def get_event_exist_file(db_session, event_id: int, file_id: int):
+    event_db = get_event(db_session, event_id)
+    return event_db.files.get(file_id)
+
+
 def update_event_tasks_list(db_session, event_id: int, event: EventUpdate):
     db_event = get_event(db_session, event_id)
     if db_event is None:
@@ -150,3 +165,50 @@ def delete_task(db_session, task_id: int):
         db_session.delete(db_task)
         db_session.commit()
     return db_task
+
+
+# Delete
+def delete_task(db_session, task_id: int):
+    db_task = get_task(db_session, task_id)
+    if db_task:
+        db_session.delete(db_task)
+        db_session.commit()
+        return db_task
+    return None
+
+
+# Create
+def create_file(db_session, content: bytes, filename: str):
+    db_file = FileDB(content=content, filename=filename)
+    db_session.add(db_file)
+    db_session.commit()
+    db_session.refresh(db_file)
+    return db_file
+
+
+# Read
+def get_file(db_session, file_id: int):
+    return db_session.query(FileDB).filter(FileDB.id == file_id).first()
+
+
+# Update
+def update_file(db_session, file_id: int, new_content: bytes, new_filename: str):
+    db_file = db_session.query(FileDB).filter(FileDB.id == file_id).first()
+    if db_file:
+        db_file.content = new_content
+        db_file.filename = new_filename
+        db_session.commit()
+        db_session.refresh(db_file)
+        return db_file
+    return None
+
+
+# Delete
+def delete_file(db_session, file_id: int):
+    db_file = db_session.query(FileDB).filter(FileDB.id == file_id).first()
+    if db_file:
+        db_session.delete(db_file)
+        db_session.commit()
+        return True
+    return False
+
