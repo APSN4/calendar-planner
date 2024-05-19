@@ -588,6 +588,7 @@
             const currentTimeStr = now.toTimeString().slice(0, 5);
 
             const event = getEventByDate(year, month, day);
+            console.log(event)
             if (event) {
                 const eventDateTime = new Date(`${event.date}T${event.time}`);
                 const reminderTime = event.reminder_time;
@@ -643,7 +644,7 @@
             return text.replace(regex, '<span class="highlight">$1</span>');
         }
 
-        setInterval(checkAndShowReminder, 15000); // Проверка каждые 10с
+        setInterval(checkAndShowReminder, 10000); // Проверка каждые 10с
 
         document.addEventListener('DOMContentLoaded', () => {
             populateYearSelect(2020, 2030); // Populate years from 2020 to 2030
