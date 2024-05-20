@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.database.db import Base, engine, get_db, TaskDB
 from app.models.user import UserId
-from app.routers import items, users, registration, login, event
+from app.routers import registration, login, event
 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -153,8 +153,6 @@ def on_startup():
     Base.metadata.create_all(bind=engine)
 
 
-app.include_router(items.router, prefix="/api/items")
-app.include_router(users.router, prefix="/api/users")
 app.include_router(registration.router, prefix="/register")
 app.include_router(login.router, prefix="/login")
 app.include_router(event.router, prefix="/event")
